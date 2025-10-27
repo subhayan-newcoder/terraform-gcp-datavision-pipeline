@@ -1,0 +1,14 @@
+[
+    {
+        "name": "name",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "NAME"
+    },
+    {
+        "name": "age",
+        "type": "INT64",
+        "mode": "NULLABLE",
+        "description": "AGE"
+    }
+]
