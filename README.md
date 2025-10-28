@@ -23,6 +23,9 @@ This project demonstrates how to build a **secure, modular, and multi-environmen
 
 ### Workflow:
 
+![Workflow Diagram](./arch-diagram.jpg?raw=true)
+![<img src="./arch-diagram.jpg?raw=true">](Workflow)
+
 1. A json file is uploaded to a **GCS input bucket**.
 2. The upload event triggers a **Pub/Sub topic**.
 3. A **Cloud Function**, subscribed to the topic, processes the file:
