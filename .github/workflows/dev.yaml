@@ -4,7 +4,7 @@ on:
     push:
         branches:
             - dev
-    pull_request:
+            - master
 
 jobs:
     terraform:
@@ -22,30 +22,41 @@ jobs:
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v3
               with:
-                  terraform_version: 1.8.5
+                  terraform_version: 1.9.6
 
             # This is the new, recommended authentication step
             - name: Authenticate to Google Cloud
               id: auth
               uses: "google-github-actions/auth@v2"
               with:
-                  # You must create these secrets in your GitHub repository
                   workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
                   service_account: ${{ secrets.GCP_SA_EMAIL }}
                   audience: ${{ secrets.GCP_AUDIENCE }}
 
-            # You no longer need the gcp-key.json, head, or jq steps
+            - name: Terraform Init (dev)
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+              run: terraform init \
+                  -backend-config="bucket=tf-state-datavision" \
+                  -backend-config="prefix=terraform/state/dev"
 
-            - name: Terraform Init
-              run: terraform init
-            # No 'env' block needed. Authentication is automatic.
+            - name: Terraform Init (prod)
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform init \
+                  -backend-config="bucket=tf-state-datavision" \
+                  -backend-config="prefix=terraform/state/prod"
 
-            - name: Terraform Plan
-              run: terraform plan -var-file="envs/dev.tfvars"
-            # No 'env' block needed.
+            - name: Terraform Plan (dev)
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+              run: terraform plan -var-file="envs/dev.tfvars" -input=false -no-color
 
-            # IMPORTANT: Fixed the 'if' condition to run on 'dev' branch
-            - name: Terraform Apply
+            - name: Terraform Plan (prod)
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform plan -var-file="envs/prod.tfvars" -input=false -no-color
+
+            - name: Terraform Apply (dev)
               if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
               run: terraform apply -auto-approve -var-file="envs/dev.tfvars"
-            # No 'env' block needed.
+
+            - name: Terraform Apply (prod)
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file="envs/prod.tfvars"
