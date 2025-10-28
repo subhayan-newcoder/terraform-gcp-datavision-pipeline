@@ -17,10 +17,9 @@ terraform {
 
 provider "google" {
   # Configuration options
-  project     = "terraform-gcp-473706"
-  region      = "asia-southeast1"
-  zone        = "asia-southeast1-a"
-  credentials = file("gcp-key.json")
+  project = "terraform-gcp-473706"
+  region  = "asia-southeast1"
+  zone    = "asia-southeast1-a"
 }
 
 provider "archive" {
