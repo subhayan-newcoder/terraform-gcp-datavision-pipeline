@@ -10,9 +10,10 @@ jobs:
     terraform:
         runs-on: ubuntu-latest
 
+        # Add permissions for WIF
         permissions:
-            contents: read
-            id-token: write
+            contents: "read"
+            id-token: "write"
 
         steps:
             - name: Checkout code
@@ -23,30 +24,27 @@ jobs:
               with:
                   terraform_version: 1.8.5
 
-            - name: Configure GCP credentials
-              run: |
-                  echo "$GCP_CREDENTIALS" | sed 's/\\n/\n/g' > gcp-key.json
-              shell: bash
+            # This is the new, recommended authentication step
+            - name: Authenticate to Google Cloud
+              id: auth
+              uses: "google-github-actions/auth@v2"
+              with:
+                  # You must create these secrets in your GitHub repository
+                  workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+                  service_account: ${{ secrets.GCP_SA_EMAIL }}
 
-            - name: Verify credentials file format
-              run: |
-                  head -5 gcp-key.json
-
-            - name: Validate JSON
-              run: jq . gcp-key.json
+            # You no longer need the gcp-key.json, head, or jq steps
 
             - name: Terraform Init
               run: terraform init
-              env:
-                  GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
+            # No 'env' block needed. Authentication is automatic.
 
             - name: Terraform Plan
               run: terraform plan -var-file="envs/dev.tfvars"
-              env:
-                  GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
+            # No 'env' block needed.
 
+            # IMPORTANT: Fixed the 'if' condition to run on 'dev' branch
             - name: Terraform Apply
-              if: github.ref == 'refs/heads/main'
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
               run: terraform apply -auto-approve -var-file="envs/dev.tfvars"
-              env:
-                  GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
+            # No 'env' block needed.
