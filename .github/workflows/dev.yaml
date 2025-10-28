@@ -32,7 +32,6 @@ jobs:
                   # You must create these secrets in your GitHub repository
                   workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
                   service_account: ${{ secrets.GCP_SA_EMAIL }}
-                  audience: ${{ secrets.GCP_AUDIENCE }}
 
             # You no longer need the gcp-key.json, head, or jq steps
 
