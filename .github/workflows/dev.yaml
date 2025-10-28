@@ -1,0 +1,45 @@
+name: Terraform-dev-Deploy
+
+on:
+    push:
+        branches:
+            - dev
+
+jobs:
+    terraform:
+        runs-on: ubuntu-latest
+
+        # Add permissions for WIF
+        permissions:
+            contents: "read"
+            id-token: "write"
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: 1.9.6
+
+            # This is the new, recommended authentication step
+            - name: Authenticate to Google Cloud
+              id: auth
+              uses: "google-github-actions/auth@v2"
+              with:
+                  workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+                  service_account: ${{ secrets.GCP_SA_EMAIL }}
+                  audience: ${{ secrets.GCP_AUDIENCE }}
+
+            - name: Terraform Init
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+              run: terraform init -backend-config="bucket=tf-state-datavision" -backend-config="prefix=terraform/state/dev"
+
+            - name: Terraform Plan
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+              run: terraform plan -var-file="envs/dev.tfvars" -input=false -no-color
+
+            - name: Terraform Apply
+              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file="envs/dev.tfvars"
