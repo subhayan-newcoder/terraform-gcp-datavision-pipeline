@@ -9,7 +9,3 @@ variable "region" {
 variable "project-id" {
   default = "terraform-gcp-473706"
 }
-
-variable "gcp-credentials" {
-}
-
