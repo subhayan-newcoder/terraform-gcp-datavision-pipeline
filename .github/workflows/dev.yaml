@@ -1,0 +1,45 @@
+name: Terraform-dev-Deploy
+
+on:
+    push:
+        branches:
+            - dev
+    pull_request:
+
+jobs:
+    terraform:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+            id-token: write
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: 1.8.5
+
+            - name: Configure GCP credentials
+              run: |
+                  echo "${{ secrets.GCP_CREDENTIALS }}" > gcp-key.json
+              shell: bash
+
+            - name: Terraform Init
+              run: terraform init
+              env:
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
+
+            - name: Terraform Plan
+              run: terraform plan -var="gcp_credentials=${{ secrets.GCP_CREDENTIALS }}" -var-file="envs/dev.tfvars"
+              env:
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
+
+            - name: Terraform Apply
+              if: github.ref == 'refs/heads/main'
+              run: terraform apply -auto-approve -var="gcp_credentials=${{ secrets.GCP_CREDENTIALS }}" -var-file="envs/dev.tfvars"
+              env:
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json

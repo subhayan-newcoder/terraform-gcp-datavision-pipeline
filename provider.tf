@@ -20,7 +20,7 @@ provider "google" {
   project     = "terraform-gcp-473706"
   region      = "asia-southeast1"
   zone        = "asia-southeast1-a"
-  credentials = "key.json"
+  credentials = jsondecode(base64decode(var.gcp-credentials))
 }
 
 provider "archive" {
