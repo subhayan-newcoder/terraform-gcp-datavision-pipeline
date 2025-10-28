@@ -1,9 +1,9 @@
-name: Terraform-dev-Deploy
+name: Terraform-prod-Deploy
 
 on:
     push:
         branches:
-            - dev
+            - master
 
 jobs:
     terraform:
@@ -33,13 +33,13 @@ jobs:
                   audience: ${{ secrets.GCP_AUDIENCE }}
 
             - name: Terraform Init
-              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-              run: terraform init -backend-config="bucket=tf-state-datavision" -backend-config="prefix=terraform/state/dev"
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform init -backend-config="bucket=tf-state-datavision" -backend-config="prefix=terraform/state/prod"
 
             - name: Terraform Plan
-              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-              run: terraform plan -var-file="envs/dev.tfvars" -input=false -no-color
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform plan -var-file="envs/prod.tfvars" -input=false -no-color
 
             - name: Terraform Apply
-              if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-              run: terraform apply -auto-approve -var-file="envs/dev.tfvars"
+              if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file="envs/prod.tfvars"
