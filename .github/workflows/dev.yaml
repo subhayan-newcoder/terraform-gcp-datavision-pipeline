@@ -25,21 +25,21 @@ jobs:
 
             - name: Configure GCP credentials
               run: |
-                  echo "${{ secrets.GCP_CREDENTIALS }}" > gcp-key.json
+                  echo '${{ secrets.GCP_CREDENTIALS }}' > gcp-key.json
               shell: bash
 
             - name: Terraform Init
               run: terraform init
               env:
-                  GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
 
             - name: Terraform Plan
               run: terraform plan -var="gcp_credentials=${{ secrets.GCP_CREDENTIALS }}" -var-file="envs/dev.tfvars"
               env:
-                  GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
 
             - name: Terraform Apply
               if: github.ref == 'refs/heads/main'
               run: terraform apply -auto-approve -var="gcp_credentials=${{ secrets.GCP_CREDENTIALS }}" -var-file="envs/dev.tfvars"
               env:
-                  GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+                  GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
