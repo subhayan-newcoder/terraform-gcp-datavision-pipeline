@@ -35,15 +35,11 @@ jobs:
 
             - name: Terraform Init (dev)
               if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-              run: terraform init \
-                  -backend-config="bucket=tf-state-datavision" \
-                  -backend-config="prefix=terraform/state/dev"
+              run: terraform init -backend-config="bucket=tf-state-datavision" -backend-config="prefix=terraform/state/dev"
 
             - name: Terraform Init (prod)
               if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-              run: terraform init \
-                  -backend-config="bucket=tf-state-datavision" \
-                  -backend-config="prefix=terraform/state/prod"
+              run: terraform init -backend-config="bucket=tf-state-datavision" -backend-config="prefix=terraform/state/prod"
 
             - name: Terraform Plan (dev)
               if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
