@@ -32,6 +32,9 @@ jobs:
               run: |
                   head -5 gcp-key.json
 
+            - name: Validate JSON
+              run: jq . gcp-key.json
+
             - name: Terraform Init
               run: terraform init
               env:
